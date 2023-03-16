@@ -90,17 +90,20 @@
     attribution: '© 3D <a href="https://osmbuildings.org/copyright/">OSM Buildings</a>'
   });
 
-  osmb.addMapTiles(
-    'https://api.mapbox.com/styles/v1/osmbuildings/cjt9gq35s09051fo7urho3m0f/tiles/256/{z}/{x}/{y}@2x?access_token=pk.eyJ1Ijoib3NtYnVpbGRpbmdzIiwiYSI6IjNldU0tNDAifQ.c5EU_3V8b87xO24tuWil0w',
-    {
-      attribution: '© Data <a href="https://openstreetmap.org/copyright/">OpenStreetMap</a> · © Map <a href="https://mapbox.com/">Mapbox</a>'
-    }
-  );
+  // osmb.addMapTiles(
+  //   'https://api.mapbox.com/styles/v1/osmbuildings/cjt9gq35s09051fo7urho3m0f/tiles/256/{z}/{x}/{y}@2x?access_token=pk.eyJ1Ijoib3NtYnVpbGRpbmdzIiwiYSI6IjNldU0tNDAifQ.c5EU_3V8b87xO24tuWil0w',
+  //   {
+  //     attribution: '© Data <a href="https://openstreetmap.org/copyright/">OpenStreetMap</a> · © Map <a href="https://mapbox.com/">Mapbox</a>'
+  //   }
+  // );
 
   osmb.addGeoJSONTiles('https://{s}.data.osmbuildings.org/0.2/anonymous/tile/{z}/{x}/{y}.json');
 
-  osmb.addOBJ(`${location.protocol}//${location.hostname}/${location.pathname}../data/Fernsehturm.obj`, { latitude:52.52000, longitude:13.41000 }, { id:'Fernsehturm', scale:2, color:'#ff0000', altitude:0, rotation:51 });
-
+  osmb.addOBJ(`http://localhost:8000/data/Fernsehturm.obj`, { latitude:52.52000, longitude:13.41000 }, { id:'Fernsehturm', scale:2, color:'yellow', altitude:0, rotation:51 });
+  var m1 = osmb.addMarker({ latitude:52.52000, longitude:13.41000, altitude: 50 }, {id: 1234, info: 'visina 20m'});
+  var m2 = osmb.addMarker({ latitude:52.52000, longitude:13.41000, altitude: 100 }, {id: 1234, info: 'visina 5m'});
+  console.log(m1);
+  console.log(m2);
 
   //***************************************************************************
 
