@@ -35,6 +35,10 @@
       top: 90px;
     }
 
+    .control.modal {
+      top: 0;
+    }
+
     .control.zoom button{
       font-weight: normal;
     }
@@ -58,6 +62,7 @@
     }
   </style>
   <link rel="stylesheet" href="OSMBuildings.css">
+  <link rel="stylesheet" href="markerModal.css">
   <script src="OSMBuildings.js"></script>
 </head>
 
@@ -79,31 +84,82 @@
   <button class="inc">+</button>
 </div>
 
+<div id="markerModal" class="control modal">
+  <div class="modal-content">
+    <span class="close">&times;</span>
+    <h2>Marker Information</h2>
+    <p><strong>Latitude</strong>: <span id="latitude-text">?</span></p>
+    <p><strong>Longitude</strong>: <span id="longitude-text">?</span></p>
+    <p><strong>Altitude</strong>: <span id="altitude-text">?</span></p>
+  </div>
+</div>
+
 <script>
   const osmb = new OSMBuildings({
     container: 'map',
-    zoom: 16,
+    zoom: 18.4,
     minZoom: 16,
-    maxZoom: 19,
-    position: { latitude: 52.52000, longitude: 13.41000 },
+    maxZoom: 25,
+    tilt: 45.0,
+    rotation: -150.9,
+    position: { latitude: 42.442728, longitude: 19.242009 },
     state: true, // stores map position/rotation in url
     attribution: '© 3D <a href="https://osmbuildings.org/copyright/">OSM Buildings</a>'
   });
 
-  // osmb.addMapTiles(
-  //   'https://api.mapbox.com/styles/v1/osmbuildings/cjt9gq35s09051fo7urho3m0f/tiles/256/{z}/{x}/{y}@2x?access_token=pk.eyJ1Ijoib3NtYnVpbGRpbmdzIiwiYSI6IjNldU0tNDAifQ.c5EU_3V8b87xO24tuWil0w',
-  //   {
-  //     attribution: '© Data <a href="https://openstreetmap.org/copyright/">OpenStreetMap</a> · © Map <a href="https://mapbox.com/">Mapbox</a>'
-  //   }
-  // );
+  // mapbox is used to show 2D terrain
+  const mapboxApiKey = "pk.eyJ1IjoibHVrYWtycyIsImEiOiJjbGY5dWlmMHIwOW9iNDJudTA0ano0aXgyIn0.gKexA504HiXgO0zduguWdA";
+  osmb.addMapTiles(
+    `https://api.mapbox.com/styles/v1/osmbuildings/cjt9gq35s09051fo7urho3m0f/tiles/256/{z}/{x}/{y}@2x?access_token=${mapboxApiKey}`,
+    {
+      attribution: '© Data <a href="https://openstreetmap.org/copyright/">OpenStreetMap</a> · © Map <a href="https://mapbox.com/">Mapbox</a>'
+    }
+  );
 
-  osmb.addGeoJSONTiles('https://{s}.data.osmbuildings.org/0.2/anonymous/tile/{z}/{x}/{y}.json');
+  // line that shows other 3D objects (buildings)
+  // osmb.addGeoJSONTiles('https://{s}.data.osmbuildings.org/0.2/anonymous/tile/{z}/{x}/{y}.json');
 
-  osmb.addOBJ(`http://localhost:8000/data/Fernsehturm.obj`, { latitude:52.52000, longitude:13.41000 }, { id:'Fernsehturm', scale:2, color:'yellow', altitude:0, rotation:51 });
-  var m1 = osmb.addMarker({ latitude:52.52000, longitude:13.41000, altitude: 50 }, {id: 1234, info: 'visina 20m'});
-  var m2 = osmb.addMarker({ latitude:52.52000, longitude:13.41000, altitude: 100 }, {id: 1234, info: 'visina 5m'});
-  console.log(m1);
-  console.log(m2);
+  // lat and long for university of montenegro
+  const customLat = 42.442814878225356;
+  const customLong = 19.241931183301773;
+
+  osmb.addOBJ(`http://0.0.0.0:8000/data/Fernsehturm.obj`, 
+    { 
+      latitude: customLat, 
+      longitude: customLong, 
+    }, 
+    { 
+      id: 'Fernsehturm', 
+      color: 'yellow', 
+      scale: 0.2, 
+      altitude: 0, 
+      rotation: 51, 
+    },
+  );
+  const m1 = osmb.addMarker(
+    { 
+      latitude: customLat, 
+      longitude: customLong, 
+      altitude: 50, 
+    }, 
+    { 
+      id: 1234, 
+      info: 'visina 20m', 
+    },
+  );
+  const m2 = osmb.addMarker(
+    { 
+      latitude: customLat, 
+      longitude: customLong, 
+      altitude: 5, 
+    }, 
+    { 
+      id: 1235, 
+      info: 'visina 5m', 
+    },
+  );
+  // console.log(m1);
+  // console.log(m2);
 
   //***************************************************************************
 
@@ -111,6 +167,15 @@
   osmb.on('pointerup', e => {
     // if none, remove any previous selection and return
     if (!e.features) {
+      if (e.marker) {
+        const markers = [m1, m2];
+        const selectedMarker = markers.find(marker => e.marker.id === marker.data.id);
+
+        modal.style.display = "block";
+        document.getElementById("latitude-text").innerHTML = selectedMarker.latitude;
+        document.getElementById("longitude-text").innerHTML = selectedMarker.longitude;
+        document.getElementById("altitude-text").innerHTML = selectedMarker.altitude;
+      }
       osmb.highlight(feature => {});
       return;
     }
@@ -153,6 +218,27 @@
       }
     });
   });
+
+  //***************************************************************************
+
+  // Get the modal
+  var modal = document.getElementById("markerModal");
+
+  // Get the <span> element that closes the modal
+  var span = document.getElementsByClassName("close")[0];
+
+  // When the user clicks on <span> (x), close the modal
+  span.onclick = function() {
+    modal.style.display = "none";
+  };
+
+  // When the user clicks anywhere outside of the modal, close it
+  window.onclick = function(event) {
+    if (event.target == modal) {
+      modal.style.display = "none";
+    }
+  };
+
 </script>
 </body>
 </html>
